@@ -7,7 +7,9 @@
         "rootDir": "./src",
         "tsBuildInfoFile": "./.ts-build",
         "strict": true,
-        "esModuleInterop": true
+        "esModuleInterop": true,
+        "declaration": true,
+        "declarationDir": "./types"
     },
     "include": ["src/**/*.ts"],
     "exclude": ["src/**/*.test.ts"],
