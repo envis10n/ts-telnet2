@@ -1,8 +1,18 @@
+import { EventEmitter } from "events";
+import * as net from "net";
+import { v4 } from "uuid";
+import { parseGMCP } from "./gmcp";
+
 export enum Negotiation {
+    /** Mark the start of a negotiation sequence. */
     IAC = 255,
+    /** Confirm  */
     WILL = 251,
+    /** Tell the other side that we refuse to use an option. */
     WONT = 252,
+    /** Request that the other side begin using an option. */
     DO = 253,
+    /**  */
     DONT = 254,
     NOP = 241,
     SB = 250,
@@ -10,6 +20,8 @@ export enum Negotiation {
     IS = 0,
     SEND = 1,
 }
+
+type EventListener = (...args: any) => void;
 
 export enum Options {
     /** Whether the other side should interpret data as 8-bit characters instead of standard NVT ASCII.  */
@@ -80,9 +92,19 @@ export enum Options {
     EXTENDED_OPTIONS_LIST = 255,
 }
 
+interface ISBParse {
+    option: Options;
+    data: Buffer;
+}
+
 export namespace Util {
     export function writeIAC(negotiate: Negotiation, option: Options): Buffer {
-        return new Buffer([Negotiation.IAC, negotiate, option]);
+        return Buffer.from([
+            Negotiation.IAC,
+            negotiate,
+            option,
+            ...Buffer.from("\n"),
+        ]);
     }
     export function writeSB(option: Options, data: string): Buffer {
         const d = Buffer.from(data);
@@ -95,13 +117,304 @@ export namespace Util {
                 fin.push(byte);
             }
         }
-        return new Buffer([
+        return Buffer.from([
             Negotiation.IAC,
             Negotiation.SB,
             option,
             ...Buffer.from(fin),
             Negotiation.IAC,
             Negotiation.SE,
+            ...Buffer.from("\n"),
         ]);
     }
+    export function isEOL(buffer: Buffer): boolean {
+        return buffer[buffer.length - 1] === Buffer.from("\n")[0];
+    }
+    export function stripEOL(buffer: Buffer): Buffer {
+        if (buffer[buffer.length - 2] === Buffer.from("\r")[0]) {
+            return buffer.slice(0, buffer.length - 2);
+        } else {
+            return buffer.slice(0, buffer.length - 1);
+        }
+    }
+    export function parseSB(buffer: Buffer): ISBParse {
+        const option = buffer[2] as Options;
+        const data = buffer.slice(3, buffer.length - 2);
+        return {
+            option,
+            data,
+        };
+    }
+}
+
+export class Server extends EventEmitter {
+    private sockets: Map<string, Socket> = new Map();
+    constructor(private server: net.Server) {
+        super();
+        this.server.on("connection", (socket) => {
+            let nsock: Socket | null = new Socket(socket);
+            this.sockets.set(nsock.uuid, nsock);
+            nsock.on("close", (hadError) => {
+                if (nsock !== null) {
+                    this.sockets.delete(nsock.uuid);
+                    nsock = null;
+                }
+            });
+            this.emit("connection", nsock);
+        });
+        this.server.on("listening", () => {
+            this.emit("listening");
+        });
+        this.server.on("error", (err) => {
+            this.emit("error", err);
+        });
+    }
+    public close(cb?: (err?: Error) => void): this {
+        this.server.close(cb);
+        return this;
+    }
+    public emit(event: "listening"): boolean;
+    public emit(event: "error", error: Error): boolean;
+    public emit(event: "connection", socket: Socket): boolean;
+    public emit(event: string, ...args: any): boolean {
+        return super.emit(event, ...args);
+    }
+    public on(event: "listening", listener: () => void): this;
+    public on(event: "connection", listener: (socket: Socket) => void): this;
+    public on(event: "error", listener: (error: Error) => void): this;
+    public on(event: string, listener: EventListener): this {
+        return super.on(event, listener);
+    }
+    public getSocket(uuid: string): Socket | undefined {
+        return this.sockets.get(uuid);
+    }
+}
+export class Socket extends EventEmitter {
+    public readonly uuid: string = v4();
+    public canGMCP: boolean = false;
+    private buffer: number[] = [];
+    constructor(private readonly socket: net.Socket) {
+        super();
+        this.socket.on("connect", () => {
+            this.emit("connect");
+        });
+        this.socket.on("end", () => {
+            this.emit("end");
+        });
+        this.socket.on("data", (data) => {
+            this.buffer.push(...data);
+            if (Util.isEOL(Buffer.from(this.buffer))) {
+                const buffer = Util.stripEOL(Buffer.from(this.buffer));
+                this.emit("data", buffer);
+                if (this.buffer[0] === Negotiation.IAC) {
+                    switch (buffer[1] as Negotiation) {
+                        case Negotiation.DO:
+                            this.emit("do", buffer[2] as Options);
+                            break;
+                        case Negotiation.DONT:
+                            this.emit("dont", buffer[2] as Options);
+                            break;
+                        case Negotiation.WILL:
+                            this.emit("will", buffer[2] as Options);
+                            break;
+                        case Negotiation.WONT:
+                            this.emit("wont", buffer[2] as Options);
+                            break;
+                        case Negotiation.SB:
+                            if (
+                                buffer[buffer.length - 2] === Negotiation.IAC &&
+                                buffer[buffer.length - 1] === Negotiation.SE
+                            ) {
+                                // Valid subnegotiation
+                                const parse = Util.parseSB(buffer);
+                                this.emit(
+                                    "subnegotiation",
+                                    parse.option,
+                                    parse.data,
+                                );
+                                if (
+                                    this.canGMCP &&
+                                    parse.option === Options.GMCP
+                                ) {
+                                    try {
+                                        const gmcp = parseGMCP(parse.data);
+                                        this.emit(
+                                            "gmcp",
+                                            gmcp.package,
+                                            gmcp.data,
+                                        );
+                                    } catch (e) {
+                                        this.emit(
+                                            "error",
+                                            new Error(
+                                                "Failed to parse GMCP packet: " +
+                                                    e.message,
+                                            ),
+                                        );
+                                    }
+                                }
+                            }
+                            break;
+                    }
+                }
+                this.buffer = [];
+            }
+        });
+    }
+    /**
+     * Request the other side of the socket to end transmission, allowing a clean disconnect.
+     * @param cb Optional callback.
+     */
+    public end(cb?: () => void): void {
+        return this.socket.end(cb);
+    }
+    /**
+     * Write data to the other end of the socket.
+     * @param data The data to write to the socket.
+     * @param cb Optional callback.
+     */
+    public write(data: string | Buffer, cb?: (err?: Error) => void): boolean {
+        return this.socket.write(data, cb);
+    }
+    /**
+     * Request the client to use an option.
+     * @param option The option requested.
+     */
+    public do(option: Options): this {
+        this.write(Util.writeIAC(Negotiation.DO, option));
+        return this;
+    }
+    /**
+     * Tell the client to no longer use an option.
+     * @param option The option to stop using.
+     */
+    public dont(option: Options): this {
+        this.write(Util.writeIAC(Negotiation.DONT, option));
+        return this;
+    }
+    /**
+     * Express willingness to use an option.
+     * @param option The option requested.
+     */
+    public will(option: Options): this {
+        this.write(Util.writeIAC(Negotiation.WILL, option));
+        return this;
+    }
+    /**
+     * Refuse to use an option.
+     * @param option The option to stop using.
+     */
+    public wont(option: Options): this {
+        this.write(Util.writeIAC(Negotiation.WONT, option));
+        return this;
+    }
+    /**
+     * Send a GMCP packet to the client (if enabled).
+     * @param packages The package string for this GMCP packet.
+     * @param data The object to send.
+     */
+    public gmcp(packages: string, data: { [key: string]: any }): boolean {
+        if (this.canGMCP) {
+            return this.write(
+                Util.writeSB(
+                    Options.GMCP,
+                    `${packages} ${JSON.stringify(data)}`,
+                ),
+            );
+        } else {
+            return false;
+        }
+    }
+    /**
+     * Enable GMCP for this client.
+     */
+    public enableGMCP(): this {
+        return this.do(Options.GMCP);
+    }
+    /**
+     * Disable GMCP for this client.
+     */
+    public disableGMCP(): this {
+        return this.dont(Options.GMCP);
+    }
+    /**
+     * Immediately destroy this socket.
+     *
+     * Don't use this
+     * @param error Error to throw. Optional.
+     */
+    public destroy(error?: Error): void {
+        return this.socket.destroy(error);
+    }
+    public emit(event: "error", error: Error): boolean;
+    /**
+     * Raw data from the internal buffer. Stripped of newline and carriage return.
+     */
+    public emit(event: "data", chunk: Buffer): boolean;
+    public emit(event: "close", hadError: boolean): boolean;
+    public emit(event: "end" | "connect"): boolean;
+    public emit(
+        event: "gmcp",
+        packages: string[],
+        obj: { [key: string]: any },
+    ): boolean;
+    public emit(
+        event: "will" | "wont" | "do" | "dont",
+        option: Options,
+    ): boolean;
+    /** An out-of-band subnegotiation. */
+    public emit(
+        event: "subnegotiation",
+        option: Options,
+        data: Buffer,
+    ): boolean;
+    public emit(event: string, ...args: any): boolean {
+        return super.emit(event, ...args);
+    }
+    public on(event: "error", listener: (error: Error) => void): this;
+    public on(event: "data", listener: (chunk: Buffer) => void): this;
+    public on(event: "close", listener: (hadError: boolean) => void): this;
+    public on(event: "end" | "connect", listener: () => void): this;
+    /**
+     * A GMCP packet event.
+     */
+    public on(
+        event: "gmcp",
+        listener: (packages: string[], obj: { [key: string]: any }) => void,
+    ): this;
+    public on(
+        event: "will" | "wont" | "do" | "dont",
+        listener: (option: Options) => void,
+    ): this;
+    public on(
+        event: "subnegotiation",
+        listener: (option: Options, data: Buffer) => void,
+    ): this;
+    public on(event: string, listener: EventListener): this {
+        return super.on(event, listener);
+    }
+}
+/**
+ * Create a connection, wrapping a raw TCP socket with a Telnet layer.
+ * @param port The port to connect on.
+ * @param host The hostname or IP to connect to.
+ * @param listener Optional callback.
+ */
+export function createConnection(
+    port: number,
+    host: string,
+    listener?: () => void,
+): Socket {
+    return new Socket(net.createConnection(port, host, listener));
+}
+/**
+ * Create a server, wrapping a raw TCP server with a Telnet layer.
+ * @param port The port to bind to.
+ * @param host The hostname or IP to bind to.
+ */
+export function createServer(port: number, host: string = "127.0.0.1"): Server {
+    const server = net.createServer();
+    const nserver = new Server(server);
+    server.listen(port, host);
+    return nserver;
 }
