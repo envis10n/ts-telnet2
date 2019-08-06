@@ -145,6 +145,54 @@ export namespace Util {
             data,
         };
     }
+    export function splitGMCP(buffer: Buffer): Buffer[] {
+        const res: Buffer[] = [];
+        const packs = buffer
+            .toString()
+            .split(Buffer.from([Negotiation.IAC, Negotiation.SE]).toString());
+        for (const pack of packs) {
+            res.push(
+                Buffer.from([
+                    ...Buffer.from(pack),
+                    Negotiation.IAC,
+                    Negotiation.SE,
+                ]),
+            );
+        }
+        console.log(res);
+        return res;
+    }
+    export function splitIAC(buffer: Buffer): Buffer[] {
+        const res: Buffer[] = [];
+        let temp: number = 0;
+        for (let i = 0; i < buffer.length; i++) {
+            const byte = buffer[i];
+            switch (byte) {
+                case Negotiation.IAC:
+                    if (
+                        buffer[i - 1] !== Negotiation.IAC &&
+                        buffer[i + 1] !== Negotiation.IAC
+                    ) {
+                        // Valid IAC, not escaped.
+                        if (buffer[i + 1] !== Negotiation.SE) {
+                            if (temp !== i) {
+                                res.push(buffer.slice(temp, i));
+                                temp = i;
+                            }
+                        }
+                    }
+                    break;
+                case Negotiation.SE:
+                    if (buffer[i - 1] === Negotiation.IAC) {
+                        // End of subnegotiation.
+                        res.push(buffer.slice(temp, i + 1));
+                        temp = i + 1;
+                    }
+                    break;
+            }
+        }
+        return res;
+    }
 }
 
 export class Server extends EventEmitter {
@@ -218,7 +266,7 @@ export class Socket extends EventEmitter {
      * Contains responder functions for options that have been requested from this side.
      */
     private responders: OptionMatrix<Responder> = {};
-    constructor(private readonly socket: net.Socket) {
+    constructor(public readonly socket: net.Socket) {
         super();
         this.socket.on("connect", () => {
             this.emit("connect");
@@ -228,10 +276,13 @@ export class Socket extends EventEmitter {
         });
         this.socket.on("data", (data) => {
             this.buffer.push(...data);
-            if (Util.isEOL(Buffer.from(this.buffer))) {
-                const buffer = Util.stripEOL(Buffer.from(this.buffer));
-                this.emit("data", buffer);
-                if (this.buffer[0] === Negotiation.IAC) {
+            if (
+                this.buffer[0] === Negotiation.IAC &&
+                this.buffer[1] !== Negotiation.IAC
+            ) {
+                // IAC!
+                for (const buffer of Util.splitIAC(Buffer.from(this.buffer))) {
+                    this.emit("data", buffer);
                     const responder = this.responders[buffer[2] as Options];
                     switch (buffer[1] as Negotiation) {
                         case Negotiation.DO:
@@ -282,19 +333,25 @@ export class Socket extends EventEmitter {
                                             gmcp.data,
                                         );
                                     } catch (e) {
-                                        this.emit(
-                                            "error",
-                                            new Error(
-                                                "Failed to parse GMCP packet: " +
-                                                    e.message,
-                                            ),
+                                        console.log(
+                                            "Failed to parse GMCP:",
+                                            e.message,
                                         );
+                                        console.log(parse.data.toString());
                                     }
                                 }
                             }
                             break;
+                        default:
+                            console.log("Unhandled IAC event:", buffer);
+                            break;
                     }
+                    this.buffer = [];
                 }
+            } else if (Util.isEOL(Buffer.from(this.buffer))) {
+                const buffer = Util.stripEOL(Buffer.from(this.buffer));
+                this.emit("data", buffer);
+                this.emit("message", buffer.toString());
                 this.buffer = [];
             }
         });
@@ -438,6 +495,10 @@ export class Socket extends EventEmitter {
      * Enabled or disabled events for specific options when a response is received.
      */
     public emit(event: "enabled" | "disabled", option: Options): boolean;
+    /**
+     * An event with a message received from the other end.
+     */
+    public emit(event: "message", data: string): boolean;
     public emit(event: "error", error: Error): boolean;
     /**
      * Raw data from the internal buffer. Stripped of newline and carriage return.
@@ -466,6 +527,7 @@ export class Socket extends EventEmitter {
     public on(event: "error", listener: (error: Error) => void): this;
     public on(event: "data", listener: (chunk: Buffer) => void): this;
     public on(event: "close", listener: (hadError: boolean) => void): this;
+    public on(event: "message", listener: (message: string) => void): this;
     public on(event: "end" | "connect", listener: () => void): this;
     /**
      * A GMCP packet event.

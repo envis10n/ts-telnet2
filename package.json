@@ -5,6 +5,7 @@
     "main": "build/index.js",
     "author": "envis10n <envis10n@protonmail.com>",
     "license": "MIT",
+    "types": "types/index.d.ts",
     "files": [
         "build",
         "LICENSE",
