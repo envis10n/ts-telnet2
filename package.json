@@ -2,9 +2,15 @@
     "name": "ts-telnet2",
     "version": "0.0.1",
     "description": "Typescript Telnet library",
-    "main": "dist/index.js",
+    "main": "build/index.js",
     "author": "envis10n <envis10n@protonmail.com>",
     "license": "MIT",
+    "files": [
+        "build",
+        "LICENSE",
+        "README.md",
+        "docs"
+    ],
     "devDependencies": {
         "@types/jest": "^24.0.16",
         "@types/node": "^12.6.9",
@@ -12,12 +18,14 @@
         "jest": "^24.8.0",
         "ts-jest": "^24.0.2",
         "tslint": "^5.18.0",
+        "typedoc": "^0.15.0",
         "typescript": "^3.5.3"
     },
     "scripts": {
         "start": "tsc && node .",
         "test": "jest",
-        "build": "tsc"
+        "build": "tsc",
+        "docs": "typedoc ./src"
     },
     "dependencies": {
         "uuid": "^3.3.2"

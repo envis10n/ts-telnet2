@@ -9,7 +9,7 @@ test("util", () => {
             'Core.Hello {"version":"0.0.1","client":"ts-telnet2"}',
         ),
     ).data;
-    const gmcp = parseGMCP(buffer);
+    const gmcp = parseGMCP(buffer.slice(0, buffer.length - 1));
     expect(gmcp.package).toContain("Core");
     expect(gmcp.package).toContain("Hello");
     expect(gmcp.data.version).toBe("0.0.1");
