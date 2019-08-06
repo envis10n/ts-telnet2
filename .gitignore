@@ -64,3 +64,5 @@ typings/
 .ts-build
 
 build/
+
+types/

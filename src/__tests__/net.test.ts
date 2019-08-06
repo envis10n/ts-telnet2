@@ -33,18 +33,16 @@ test("net", async () => {
             });
         });
         let client: Socket | null = createConnection(3355, "127.0.0.1");
-        client.on("connect", () => {
+        client.on("connect", async () => {
             if (client !== null) {
                 console.log("Client connect");
-                client.enableGMCP();
-            }
-        });
-        client.on("enabled", (opt) => {
-            if (opt === Options.GMCP && client !== null) {
-                client.gmcp("Core.Hello", {
-                    version: "0.0.1",
-                    client: "ts-telnet2",
-                });
+                await client.enableGMCP();
+                if (client.options[Options.GMCP] && client !== null) {
+                    client.gmcp("Core.Hello", {
+                        version: "0.0.1",
+                        client: "ts-telnet2",
+                    });
+                }
             }
         });
         client.on("end", () => {

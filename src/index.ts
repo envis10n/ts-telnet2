@@ -339,8 +339,8 @@ export class Socket extends EventEmitter {
                         this.emit("disabled", option);
                     }
                     this.responders[option] = undefined;
+                    resolve();
                 };
-                resolve();
             } else {
                 reject();
             }
@@ -364,85 +364,70 @@ export class Socket extends EventEmitter {
     /**
      * Request the client to use an option.
      * @param option The option requested.
-     * @return Resolves based on whether or not the responder was actually setup.
+     * @param response Whether this is a response. If it is, a responder will not be created.
      */
-    public async do(
-        option: Options,
-        response: boolean = false,
-    ): Promise<boolean> {
-        try {
-            if (!response) {
-                await this.setupResponder(Negotiation.DO, option);
-            } else {
-                this.options[option] = true;
-            }
+    public async do(option: Options, response: boolean = false): Promise<void> {
+        if (!response) {
+            const responder = this.setupResponder(Negotiation.DO, option);
             this.write(Util.writeIAC(Negotiation.DO, option));
-            return true;
-        } catch (e) {
-            return false;
+            return responder;
+        } else {
+            this.options[option] = true;
+            this.write(Util.writeIAC(Negotiation.DO, option));
         }
     }
     /**
      * Tell the client to no longer use an option.
      * @param option The option to stop using.
-     * @return Resolves based on whether or not the responder was actually setup.
+     * @param response Whether this is a response. If it is, a responder will not be created.
      */
     public async dont(
         option: Options,
         response: boolean = false,
-    ): Promise<boolean> {
-        try {
-            if (!response) {
-                await this.setupResponder(Negotiation.DONT, option);
-            } else {
-                this.options[option] = undefined;
-            }
+    ): Promise<void> {
+        if (!response) {
+            const responder = this.setupResponder(Negotiation.DONT, option);
             this.write(Util.writeIAC(Negotiation.DONT, option));
-            return true;
-        } catch (e) {
-            return false;
+            return responder;
+        } else {
+            this.options[option] = undefined;
+            this.write(Util.writeIAC(Negotiation.DONT, option));
         }
     }
     /**
      * Express willingness to use an option.
      * @param option The option requested.
-     * @return Resolves based on whether or not the responder was actually setup.
+     * @param response Whether this is a response. If it is, a responder will not be created.
      */
     public async will(
         option: Options,
         response: boolean = false,
-    ): Promise<boolean> {
-        try {
-            if (!response) {
-                await this.setupResponder(Negotiation.WILL, option);
-            } else {
-                this.options[option] = true;
-            }
+    ): Promise<void> {
+        if (!response) {
+            const responder = this.setupResponder(Negotiation.WILL, option);
             this.write(Util.writeIAC(Negotiation.WILL, option));
-            return true;
-        } catch (e) {
-            return false;
+            return responder;
+        } else {
+            this.options[option] = true;
+            this.write(Util.writeIAC(Negotiation.WILL, option));
         }
     }
     /**
      * Refuse to use an option.
      * @param option The option to stop using.
-     * @return Resolves based on whether or not the responder was actually setup.
+     * @param response Whether this is a response. If it is, a responder will not be created.
      */
     public async wont(
         option: Options,
         response: boolean = false,
-    ): Promise<boolean> {
-        try {
-            if (!response) {
-                await this.setupResponder(Negotiation.WONT, option);
-            } else {
-                this.options[option] = undefined;
-            }
+    ): Promise<void> {
+        if (!response) {
+            const responder = this.setupResponder(Negotiation.WONT, option);
             this.write(Util.writeIAC(Negotiation.WONT, option));
-            return true;
-        } catch (e) {
-            return false;
+            return responder;
+        } else {
+            this.options[option] = undefined;
+            this.write(Util.writeIAC(Negotiation.WONT, option));
         }
     }
     /**
@@ -466,14 +451,14 @@ export class Socket extends EventEmitter {
      * Enable GMCP for this client.
      * @return Resolves based on whether or not the responder was actually setup.
      */
-    public async enableGMCP(): Promise<boolean> {
+    public async enableGMCP(): Promise<void> {
         return this.do(Options.GMCP);
     }
     /**
      * Disable GMCP for this client.
      * @return Resolves based on whether or not the responder was actually setup.
      */
-    public async disableGMCP(): Promise<boolean> {
+    public async disableGMCP(): Promise<void> {
         return this.dont(Options.GMCP);
     }
     /**
