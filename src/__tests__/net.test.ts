@@ -28,8 +28,7 @@ test("net", async () => {
             });
             socket.on("do", (option) => {
                 if (option === Options.GMCP) {
-                    socket.canGMCP = true;
-                    socket.will(Options.GMCP);
+                    socket.will(Options.GMCP, true);
                 }
             });
         });
@@ -40,20 +39,18 @@ test("net", async () => {
                 client.enableGMCP();
             }
         });
-        client.on("will", (option) => {
-            if (client !== null) {
-                if (option === Options.GMCP) {
-                    client.canGMCP = true;
-                    client.gmcp("Core.Hello", {
-                        version: "0.0.1",
-                        client: "ts-telnet2",
-                    });
-                }
+        client.on("enabled", (opt) => {
+            if (opt === Options.GMCP && client !== null) {
+                client.gmcp("Core.Hello", {
+                    version: "0.0.1",
+                    client: "ts-telnet2",
+                });
             }
         });
         client.on("end", () => {
             console.log("Client end");
             if (client !== null) {
+                console.log(client.options);
                 client = null;
             }
         });

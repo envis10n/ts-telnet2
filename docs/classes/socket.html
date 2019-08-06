@@ -93,7 +93,8 @@
 							<h3>Properties</h3>
 							<ul class="tsd-index-list">
 								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="socket.html#buffer" class="tsd-kind-icon">buffer</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-class"><a href="socket.html#cangmcp" class="tsd-kind-icon">canGMCP</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="socket.html#options" class="tsd-kind-icon">options</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="socket.html#responders" class="tsd-kind-icon">responders</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="socket.html#socket-1" class="tsd-kind-icon">socket</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class"><a href="socket.html#uuid" class="tsd-kind-icon">uuid</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="socket.html#defaultmaxlisteners" class="tsd-kind-icon">default<wbr>Max<wbr>Listeners</a></li>
@@ -124,6 +125,7 @@
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-overwrite tsd-is-inherited"><a href="socket.html#removealllisteners" class="tsd-kind-icon">remove<wbr>All<wbr>Listeners</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-overwrite tsd-is-inherited"><a href="socket.html#removelistener" class="tsd-kind-icon">remove<wbr>Listener</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-overwrite tsd-is-inherited"><a href="socket.html#setmaxlisteners" class="tsd-kind-icon">set<wbr>Max<wbr>Listeners</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="socket.html#setupresponder" class="tsd-kind-icon">setup<wbr>Responder</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="socket.html#will" class="tsd-kind-icon">will</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="socket.html#wont" class="tsd-kind-icon">wont</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="socket.html#write" class="tsd-kind-icon">write</a></li>
@@ -145,7 +147,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/envis10n/ts-telnet2/blob/65dbb7f/src/index.ts#L195">index.ts:195</a></li>
+									<li>Defined in <a href="https://github.com/envis10n/ts-telnet2/blob/212d52a/src/index.ts#L218">index.ts:218</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -167,19 +169,56 @@
 					<div class="tsd-signature tsd-kind-icon">buffer<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> =&nbsp;[]</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/envis10n/ts-telnet2/blob/65dbb7f/src/index.ts#L195">index.ts:195</a></li>
+							<li>Defined in <a href="https://github.com/envis10n/ts-telnet2/blob/212d52a/src/index.ts#L212">index.ts:212</a></li>
 						</ul>
 					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>Buffer for incoming data.</p>
+						</div>
+						<p>Empties when an EOL is encountered, emitting the &quot;data&quot; event.</p>
+					</div>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
-					<a name="cangmcp" class="tsd-anchor"></a>
-					<h3>canGMCP</h3>
-					<div class="tsd-signature tsd-kind-icon">canGMCP<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> =&nbsp;false</span></div>
+					<a name="options" class="tsd-anchor"></a>
+					<h3>options</h3>
+					<div class="tsd-signature tsd-kind-icon">options<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">object</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/envis10n/ts-telnet2/blob/65dbb7f/src/index.ts#L194">index.ts:194</a></li>
+							<li>Defined in <a href="https://github.com/envis10n/ts-telnet2/blob/212d52a/src/index.ts#L206">index.ts:206</a></li>
 						</ul>
 					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>Currently enabled options.</p>
+						</div>
+					</div>
+					<div class="tsd-type-declaration">
+						<h4>Type declaration</h4>
+						<ul class="tsd-parameters">
+						</ul>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
+					<a name="responders" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> responders</h3>
+					<div class="tsd-signature tsd-kind-icon">responders<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">object</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/envis10n/ts-telnet2/blob/212d52a/src/index.ts#L218">index.ts:218</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>Responder storage object.</p>
+						</div>
+						<p>Contains responder functions for options that have been requested from this side.</p>
+					</div>
+					<div class="tsd-type-declaration">
+						<h4>Type declaration</h4>
+						<ul class="tsd-parameters">
+						</ul>
+					</div>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
 					<a name="socket-1" class="tsd-anchor"></a>
@@ -187,7 +226,7 @@
 					<div class="tsd-signature tsd-kind-icon">socket<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Socket</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/envis10n/ts-telnet2/blob/65dbb7f/src/index.ts#L196">index.ts:196</a></li>
+							<li>Defined in <a href="https://github.com/envis10n/ts-telnet2/blob/212d52a/src/index.ts#L219">index.ts:219</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -197,7 +236,7 @@
 					<div class="tsd-signature tsd-kind-icon">uuid<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> =&nbsp;v4()</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/envis10n/ts-telnet2/blob/65dbb7f/src/index.ts#L193">index.ts:193</a></li>
+							<li>Defined in <a href="https://github.com/envis10n/ts-telnet2/blob/212d52a/src/index.ts#L202">index.ts:202</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -271,7 +310,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/envis10n/ts-telnet2/blob/65dbb7f/src/index.ts#L346">index.ts:346</a></li>
+									<li>Defined in <a href="https://github.com/envis10n/ts-telnet2/blob/212d52a/src/index.ts#L483">index.ts:483</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -297,13 +336,13 @@
 					<a name="disablegmcp" class="tsd-anchor"></a>
 					<h3>disableGMCP</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">disableGMCP<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">this</span></li>
+						<li class="tsd-signature tsd-kind-icon">disableGMCP<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">&gt;</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/envis10n/ts-telnet2/blob/65dbb7f/src/index.ts#L337">index.ts:337</a></li>
+									<li>Defined in <a href="https://github.com/envis10n/ts-telnet2/blob/212d52a/src/index.ts#L474">index.ts:474</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -311,7 +350,8 @@
 									<p>Disable GMCP for this client.</p>
 								</div>
 							</div>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">this</span></h4>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">&gt;</span></h4>
+							<p>Resolves based on whether or not the responder was actually setup.</p>
 						</li>
 					</ul>
 				</section>
@@ -319,13 +359,13 @@
 					<a name="do" class="tsd-anchor"></a>
 					<h3>do</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">do<span class="tsd-signature-symbol">(</span>option<span class="tsd-signature-symbol">: </span><a href="../enums/options.html" class="tsd-signature-type">Options</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">this</span></li>
+						<li class="tsd-signature tsd-kind-icon">do<span class="tsd-signature-symbol">(</span>option<span class="tsd-signature-symbol">: </span><a href="../enums/options.html" class="tsd-signature-type">Options</a>, response<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">&gt;</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/envis10n/ts-telnet2/blob/65dbb7f/src/index.ts#L283">index.ts:283</a></li>
+									<li>Defined in <a href="https://github.com/envis10n/ts-telnet2/blob/212d52a/src/index.ts#L367">index.ts:367</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -341,8 +381,12 @@
 										<p>The option requested.</p>
 									</div>
 								</li>
+								<li>
+									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> response: <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> =&nbsp;false</span></h5>
+								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">this</span></h4>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">&gt;</span></h4>
+							<p>Resolves based on whether or not the responder was actually setup.</p>
 						</li>
 					</ul>
 				</section>
@@ -350,13 +394,13 @@
 					<a name="dont" class="tsd-anchor"></a>
 					<h3>dont</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">dont<span class="tsd-signature-symbol">(</span>option<span class="tsd-signature-symbol">: </span><a href="../enums/options.html" class="tsd-signature-type">Options</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">this</span></li>
+						<li class="tsd-signature tsd-kind-icon">dont<span class="tsd-signature-symbol">(</span>option<span class="tsd-signature-symbol">: </span><a href="../enums/options.html" class="tsd-signature-type">Options</a>, response<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">&gt;</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/envis10n/ts-telnet2/blob/65dbb7f/src/index.ts#L291">index.ts:291</a></li>
+									<li>Defined in <a href="https://github.com/envis10n/ts-telnet2/blob/212d52a/src/index.ts#L388">index.ts:388</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -372,8 +416,12 @@
 										<p>The option to stop using.</p>
 									</div>
 								</li>
+								<li>
+									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> response: <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> =&nbsp;false</span></h5>
+								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">this</span></h4>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">&gt;</span></h4>
+							<p>Resolves based on whether or not the responder was actually setup.</p>
 						</li>
 					</ul>
 				</section>
@@ -381,6 +429,7 @@
 					<a name="emit" class="tsd-anchor"></a>
 					<h3>emit</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
+						<li class="tsd-signature tsd-kind-icon">emit<span class="tsd-signature-symbol">(</span>event<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">"enabled"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"disabled"</span>, option<span class="tsd-signature-symbol">: </span><a href="../enums/options.html" class="tsd-signature-type">Options</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span></li>
 						<li class="tsd-signature tsd-kind-icon">emit<span class="tsd-signature-symbol">(</span>event<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">"error"</span>, error<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Error</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span></li>
 						<li class="tsd-signature tsd-kind-icon">emit<span class="tsd-signature-symbol">(</span>event<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">"data"</span>, chunk<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Buffer</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span></li>
 						<li class="tsd-signature tsd-kind-icon">emit<span class="tsd-signature-symbol">(</span>event<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">"close"</span>, hadError<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span></li>
@@ -394,7 +443,30 @@
 							<aside class="tsd-sources">
 								<p>Overrides EventEmitter.emit</p>
 								<ul>
-									<li>Defined in <a href="https://github.com/envis10n/ts-telnet2/blob/65dbb7f/src/index.ts#L349">index.ts:349</a></li>
+									<li>Defined in <a href="https://github.com/envis10n/ts-telnet2/blob/212d52a/src/index.ts#L489">index.ts:489</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Enabled or disabled events for specific options when a response is received.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>event: <span class="tsd-signature-type">"enabled"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"disabled"</span></h5>
+								</li>
+								<li>
+									<h5>option: <a href="../enums/options.html" class="tsd-signature-type">Options</a></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4>
+						</li>
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Overrides EventEmitter.emit</p>
+								<ul>
+									<li>Defined in <a href="https://github.com/envis10n/ts-telnet2/blob/212d52a/src/index.ts#L490">index.ts:490</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -412,7 +484,7 @@
 							<aside class="tsd-sources">
 								<p>Overrides EventEmitter.emit</p>
 								<ul>
-									<li>Defined in <a href="https://github.com/envis10n/ts-telnet2/blob/65dbb7f/src/index.ts#L353">index.ts:353</a></li>
+									<li>Defined in <a href="https://github.com/envis10n/ts-telnet2/blob/212d52a/src/index.ts#L494">index.ts:494</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -435,7 +507,7 @@
 							<aside class="tsd-sources">
 								<p>Overrides EventEmitter.emit</p>
 								<ul>
-									<li>Defined in <a href="https://github.com/envis10n/ts-telnet2/blob/65dbb7f/src/index.ts#L354">index.ts:354</a></li>
+									<li>Defined in <a href="https://github.com/envis10n/ts-telnet2/blob/212d52a/src/index.ts#L495">index.ts:495</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -453,7 +525,7 @@
 							<aside class="tsd-sources">
 								<p>Overrides EventEmitter.emit</p>
 								<ul>
-									<li>Defined in <a href="https://github.com/envis10n/ts-telnet2/blob/65dbb7f/src/index.ts#L355">index.ts:355</a></li>
+									<li>Defined in <a href="https://github.com/envis10n/ts-telnet2/blob/212d52a/src/index.ts#L496">index.ts:496</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -468,7 +540,7 @@
 							<aside class="tsd-sources">
 								<p>Overrides EventEmitter.emit</p>
 								<ul>
-									<li>Defined in <a href="https://github.com/envis10n/ts-telnet2/blob/65dbb7f/src/index.ts#L356">index.ts:356</a></li>
+									<li>Defined in <a href="https://github.com/envis10n/ts-telnet2/blob/212d52a/src/index.ts#L497">index.ts:497</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -494,7 +566,7 @@
 							<aside class="tsd-sources">
 								<p>Overrides EventEmitter.emit</p>
 								<ul>
-									<li>Defined in <a href="https://github.com/envis10n/ts-telnet2/blob/65dbb7f/src/index.ts#L361">index.ts:361</a></li>
+									<li>Defined in <a href="https://github.com/envis10n/ts-telnet2/blob/212d52a/src/index.ts#L502">index.ts:502</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -512,7 +584,7 @@
 							<aside class="tsd-sources">
 								<p>Overrides EventEmitter.emit</p>
 								<ul>
-									<li>Defined in <a href="https://github.com/envis10n/ts-telnet2/blob/65dbb7f/src/index.ts#L366">index.ts:366</a></li>
+									<li>Defined in <a href="https://github.com/envis10n/ts-telnet2/blob/212d52a/src/index.ts#L507">index.ts:507</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -540,13 +612,13 @@
 					<a name="enablegmcp" class="tsd-anchor"></a>
 					<h3>enableGMCP</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">enableGMCP<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">this</span></li>
+						<li class="tsd-signature tsd-kind-icon">enableGMCP<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">&gt;</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/envis10n/ts-telnet2/blob/65dbb7f/src/index.ts#L331">index.ts:331</a></li>
+									<li>Defined in <a href="https://github.com/envis10n/ts-telnet2/blob/212d52a/src/index.ts#L467">index.ts:467</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -554,7 +626,8 @@
 									<p>Enable GMCP for this client.</p>
 								</div>
 							</div>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">this</span></h4>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">&gt;</span></h4>
+							<p>Resolves based on whether or not the responder was actually setup.</p>
 						</li>
 					</ul>
 				</section>
@@ -568,7 +641,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/envis10n/ts-telnet2/blob/65dbb7f/src/index.ts#L268">index.ts:268</a></li>
+									<li>Defined in <a href="https://github.com/envis10n/ts-telnet2/blob/212d52a/src/index.ts#L351">index.ts:351</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -637,7 +710,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/envis10n/ts-telnet2/blob/65dbb7f/src/index.ts#L316">index.ts:316</a></li>
+									<li>Defined in <a href="https://github.com/envis10n/ts-telnet2/blob/212d52a/src/index.ts#L451">index.ts:451</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -776,13 +849,14 @@
 						<li class="tsd-signature tsd-kind-icon">on<span class="tsd-signature-symbol">(</span>event<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">"gmcp"</span>, listener<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">function</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">this</span></li>
 						<li class="tsd-signature tsd-kind-icon">on<span class="tsd-signature-symbol">(</span>event<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">"will"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"wont"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"do"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"dont"</span>, listener<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">function</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">this</span></li>
 						<li class="tsd-signature tsd-kind-icon">on<span class="tsd-signature-symbol">(</span>event<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">"subnegotiation"</span>, listener<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">function</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">this</span></li>
+						<li class="tsd-signature tsd-kind-icon">on<span class="tsd-signature-symbol">(</span>event<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">"enabled"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"disabled"</span>, listener<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">function</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">this</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<p>Overrides EventEmitter.on</p>
 								<ul>
-									<li>Defined in <a href="https://github.com/envis10n/ts-telnet2/blob/65dbb7f/src/index.ts#L374">index.ts:374</a></li>
+									<li>Defined in <a href="https://github.com/envis10n/ts-telnet2/blob/212d52a/src/index.ts#L515">index.ts:515</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -818,7 +892,7 @@
 							<aside class="tsd-sources">
 								<p>Overrides EventEmitter.on</p>
 								<ul>
-									<li>Defined in <a href="https://github.com/envis10n/ts-telnet2/blob/65dbb7f/src/index.ts#L375">index.ts:375</a></li>
+									<li>Defined in <a href="https://github.com/envis10n/ts-telnet2/blob/212d52a/src/index.ts#L516">index.ts:516</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -854,7 +928,7 @@
 							<aside class="tsd-sources">
 								<p>Overrides EventEmitter.on</p>
 								<ul>
-									<li>Defined in <a href="https://github.com/envis10n/ts-telnet2/blob/65dbb7f/src/index.ts#L376">index.ts:376</a></li>
+									<li>Defined in <a href="https://github.com/envis10n/ts-telnet2/blob/212d52a/src/index.ts#L517">index.ts:517</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -890,7 +964,7 @@
 							<aside class="tsd-sources">
 								<p>Overrides EventEmitter.on</p>
 								<ul>
-									<li>Defined in <a href="https://github.com/envis10n/ts-telnet2/blob/65dbb7f/src/index.ts#L377">index.ts:377</a></li>
+									<li>Defined in <a href="https://github.com/envis10n/ts-telnet2/blob/212d52a/src/index.ts#L518">index.ts:518</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -920,7 +994,7 @@
 							<aside class="tsd-sources">
 								<p>Overrides EventEmitter.on</p>
 								<ul>
-									<li>Defined in <a href="https://github.com/envis10n/ts-telnet2/blob/65dbb7f/src/index.ts#L381">index.ts:381</a></li>
+									<li>Defined in <a href="https://github.com/envis10n/ts-telnet2/blob/212d52a/src/index.ts#L522">index.ts:522</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -969,7 +1043,7 @@
 							<aside class="tsd-sources">
 								<p>Overrides EventEmitter.on</p>
 								<ul>
-									<li>Defined in <a href="https://github.com/envis10n/ts-telnet2/blob/65dbb7f/src/index.ts#L385">index.ts:385</a></li>
+									<li>Defined in <a href="https://github.com/envis10n/ts-telnet2/blob/212d52a/src/index.ts#L526">index.ts:526</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1005,7 +1079,7 @@
 							<aside class="tsd-sources">
 								<p>Overrides EventEmitter.on</p>
 								<ul>
-									<li>Defined in <a href="https://github.com/envis10n/ts-telnet2/blob/65dbb7f/src/index.ts#L389">index.ts:389</a></li>
+									<li>Defined in <a href="https://github.com/envis10n/ts-telnet2/blob/212d52a/src/index.ts#L530">index.ts:530</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1029,6 +1103,47 @@
 														</li>
 														<li>
 															<h5>data: <span class="tsd-signature-type">Buffer</span></h5>
+														</li>
+													</ul>
+													<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+												</li>
+											</ul>
+										</li>
+									</ul>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">this</span></h4>
+						</li>
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Overrides EventEmitter.on</p>
+								<ul>
+									<li>Defined in <a href="https://github.com/envis10n/ts-telnet2/blob/212d52a/src/index.ts#L537">index.ts:537</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Enabled or disabled events for specific options when a response is received.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>event: <span class="tsd-signature-type">"enabled"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"disabled"</span></h5>
+								</li>
+								<li>
+									<h5>listener: <span class="tsd-signature-type">function</span></h5>
+									<ul class="tsd-parameters">
+										<li class="tsd-parameter-siganture">
+											<ul class="tsd-signatures tsd-kind-type-literal tsd-is-not-exported">
+												<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">(</span>option<span class="tsd-signature-symbol">: </span><a href="../enums/options.html" class="tsd-signature-type">Options</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+											</ul>
+											<ul class="tsd-descriptions">
+												<li class="tsd-description">
+													<h4 class="tsd-parameters-title">Parameters</h4>
+													<ul class="tsd-parameters">
+														<li>
+															<h5>option: <a href="../enums/options.html" class="tsd-signature-type">Options</a></h5>
 														</li>
 													</ul>
 													<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
@@ -1302,16 +1417,53 @@
 					</ul>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
-					<a name="will" class="tsd-anchor"></a>
-					<h3>will</h3>
+					<a name="setupresponder" class="tsd-anchor"></a>
+					<h3>setup<wbr>Responder</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">will<span class="tsd-signature-symbol">(</span>option<span class="tsd-signature-symbol">: </span><a href="../enums/options.html" class="tsd-signature-type">Options</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">this</span></li>
+						<li class="tsd-signature tsd-kind-icon">setup<wbr>Responder<span class="tsd-signature-symbol">(</span>neg<span class="tsd-signature-symbol">: </span><a href="../enums/negotiation.html" class="tsd-signature-type">Negotiation</a>, option<span class="tsd-signature-symbol">: </span><a href="../enums/options.html" class="tsd-signature-type">Options</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/envis10n/ts-telnet2/blob/65dbb7f/src/index.ts#L299">index.ts:299</a></li>
+									<li>Defined in <a href="https://github.com/envis10n/ts-telnet2/blob/212d52a/src/index.ts#L305">index.ts:305</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Sets up a responder function that is called when a response is received from the other end.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>neg: <a href="../enums/negotiation.html" class="tsd-signature-type">Negotiation</a></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>Negotiation type.</p>
+									</div>
+								</li>
+								<li>
+									<h5>option: <a href="../enums/options.html" class="tsd-signature-type">Options</a></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>The option being negotiated.</p>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="will" class="tsd-anchor"></a>
+					<h3>will</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">will<span class="tsd-signature-symbol">(</span>option<span class="tsd-signature-symbol">: </span><a href="../enums/options.html" class="tsd-signature-type">Options</a>, response<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/envis10n/ts-telnet2/blob/212d52a/src/index.ts#L409">index.ts:409</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1327,8 +1479,12 @@
 										<p>The option requested.</p>
 									</div>
 								</li>
+								<li>
+									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> response: <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> =&nbsp;false</span></h5>
+								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">this</span></h4>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">&gt;</span></h4>
+							<p>Resolves based on whether or not the responder was actually setup.</p>
 						</li>
 					</ul>
 				</section>
@@ -1336,13 +1492,13 @@
 					<a name="wont" class="tsd-anchor"></a>
 					<h3>wont</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">wont<span class="tsd-signature-symbol">(</span>option<span class="tsd-signature-symbol">: </span><a href="../enums/options.html" class="tsd-signature-type">Options</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">this</span></li>
+						<li class="tsd-signature tsd-kind-icon">wont<span class="tsd-signature-symbol">(</span>option<span class="tsd-signature-symbol">: </span><a href="../enums/options.html" class="tsd-signature-type">Options</a>, response<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">&gt;</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/envis10n/ts-telnet2/blob/65dbb7f/src/index.ts#L307">index.ts:307</a></li>
+									<li>Defined in <a href="https://github.com/envis10n/ts-telnet2/blob/212d52a/src/index.ts#L430">index.ts:430</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1358,8 +1514,12 @@
 										<p>The option to stop using.</p>
 									</div>
 								</li>
+								<li>
+									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> response: <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> =&nbsp;false</span></h5>
+								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">this</span></h4>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">&gt;</span></h4>
+							<p>Resolves based on whether or not the responder was actually setup.</p>
 						</li>
 					</ul>
 				</section>
@@ -1373,7 +1533,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/envis10n/ts-telnet2/blob/65dbb7f/src/index.ts#L276">index.ts:276</a></li>
+									<li>Defined in <a href="https://github.com/envis10n/ts-telnet2/blob/212d52a/src/index.ts#L359">index.ts:359</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1467,7 +1627,10 @@
 								<a href="socket.html#buffer" class="tsd-kind-icon">buffer</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class">
-								<a href="socket.html#cangmcp" class="tsd-kind-icon">canGMCP</a>
+								<a href="socket.html#options" class="tsd-kind-icon">options</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
+								<a href="socket.html#responders" class="tsd-kind-icon">responders</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
 								<a href="socket.html#socket-1" class="tsd-kind-icon">socket</a>
@@ -1545,6 +1708,9 @@
 								<a href="socket.html#setmaxlisteners" class="tsd-kind-icon">set<wbr>Max<wbr>Listeners</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="socket.html#setupresponder" class="tsd-kind-icon">setup<wbr>Responder</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
 								<a href="socket.html#will" class="tsd-kind-icon">will</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
@@ -1568,6 +1734,9 @@
 					</li>
 					<li class=" tsd-kind-type-alias tsd-is-not-exported">
 						<a href="../index.html#eventlistener" class="tsd-kind-icon">Event<wbr>Listener</a>
+					</li>
+					<li class=" tsd-kind-type-alias tsd-is-not-exported">
+						<a href="../index.html#responder" class="tsd-kind-icon">Responder</a>
 					</li>
 					<li class=" tsd-kind-function">
 						<a href="../index.html#createconnection" class="tsd-kind-icon">create<wbr>Connection</a>
