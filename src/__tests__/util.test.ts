@@ -1,7 +1,17 @@
-import { Util, Negotiation, Options } from "../";
+import { parseGMCP } from "../gmcp";
+import { Util, Options } from "../";
 
 test("util", () => {
-    console.log(Util.writeIAC(Negotiation.DO, Options.ECHO));
-
-    console.log(Util.writeSB(Options.CHARSET, "UTF-8"));
+    // Fake SB packet with GMCP Core.Hello data.
+    const buffer = Util.parseSB(
+        Util.writeSB(
+            Options.GMCP,
+            'Core.Hello {"version":"0.0.1","client":"ts-telnet2"}',
+        ),
+    ).data;
+    const gmcp = parseGMCP(buffer);
+    expect(gmcp.package).toContain("Core");
+    expect(gmcp.package).toContain("Hello");
+    expect(gmcp.data.version).toBe("0.0.1");
+    expect(gmcp.data.client).toBe("ts-telnet2");
 });
