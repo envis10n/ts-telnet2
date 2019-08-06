@@ -12,12 +12,12 @@
         "declarationDir": "./types"
     },
     "include": ["src/**/*.ts"],
-    "exclude": ["src/**/*.test.ts"],
+    "exclude": ["src/**/*.test.ts", "src/examples/**/*"],
     "typedocOptions": {
         "mode": "file",
         "out": "docs",
         "name": "ts-telnet2",
         "readme": "none",
-        "exclude": ["**/*.test.ts"]
+        "exclude": ["src/__tests__/**/*", "src/examples/**/*"]
     }
 }
