@@ -189,10 +189,33 @@ export class Server extends EventEmitter {
         return this.sockets.get(uuid);
     }
 }
+
+type Responder = (
+    negotiate:
+        | Negotiation.DO
+        | Negotiation.DONT
+        | Negotiation.WILL
+        | Negotiation.WONT,
+) => void;
+
 export class Socket extends EventEmitter {
     public readonly uuid: string = v4();
-    public canGMCP: boolean = false;
+    /**
+     * Currently enabled options.
+     */
+    public options: { [key in Options]?: boolean } = {};
+    /**
+     * Buffer for incoming data.
+     *
+     * Empties when an EOL is encountered, emitting the "data" event.
+     */
     private buffer: number[] = [];
+    /**
+     * Responder storage object.
+     *
+     * Contains responder functions for options that have been requested from this side.
+     */
+    private responders: { [key in Options]?: Responder } = {};
     constructor(private readonly socket: net.Socket) {
         super();
         this.socket.on("connect", () => {
@@ -207,17 +230,30 @@ export class Socket extends EventEmitter {
                 const buffer = Util.stripEOL(Buffer.from(this.buffer));
                 this.emit("data", buffer);
                 if (this.buffer[0] === Negotiation.IAC) {
+                    const responder = this.responders[buffer[2] as Options];
                     switch (buffer[1] as Negotiation) {
                         case Negotiation.DO:
+                            if (responder !== undefined) {
+                                responder(buffer[1]);
+                            }
                             this.emit("do", buffer[2] as Options);
                             break;
                         case Negotiation.DONT:
+                            if (responder !== undefined) {
+                                responder(buffer[1]);
+                            }
                             this.emit("dont", buffer[2] as Options);
                             break;
                         case Negotiation.WILL:
+                            if (responder !== undefined) {
+                                responder(buffer[1]);
+                            }
                             this.emit("will", buffer[2] as Options);
                             break;
                         case Negotiation.WONT:
+                            if (responder !== undefined) {
+                                responder(buffer[1]);
+                            }
                             this.emit("wont", buffer[2] as Options);
                             break;
                         case Negotiation.SB:
@@ -233,7 +269,7 @@ export class Socket extends EventEmitter {
                                     parse.data,
                                 );
                                 if (
-                                    this.canGMCP &&
+                                    this.options[Options.GMCP] &&
                                     parse.option === Options.GMCP
                                 ) {
                                     try {
@@ -262,6 +298,53 @@ export class Socket extends EventEmitter {
         });
     }
     /**
+     * Sets up a responder function that is called when a response is received from the other end.
+     * @param neg Negotiation type.
+     * @param option The option being negotiated.
+     */
+    public async setupResponder(
+        neg: Negotiation,
+        option: Options,
+    ): Promise<void> {
+        return new Promise((resolve, reject) => {
+            if (this.responders[option] === undefined) {
+                this.responders[option] = (n) => {
+                    switch (n) {
+                        case Negotiation.DO:
+                            if (neg === Negotiation.WILL) {
+                                this.options[option] = true;
+                            }
+                            break;
+                        case Negotiation.DONT:
+                            if (neg === Negotiation.WONT) {
+                                this.options[option] = undefined;
+                            }
+                            break;
+                        case Negotiation.WILL:
+                            if (neg === Negotiation.DO) {
+                                this.options[option] = true;
+                            }
+                            break;
+                        case Negotiation.WONT:
+                            if (neg === Negotiation.DONT) {
+                                this.options[option] = undefined;
+                            }
+                            break;
+                    }
+                    if (this.options[option]) {
+                        this.emit("enabled", option);
+                    } else {
+                        this.emit("disabled", option);
+                    }
+                    this.responders[option] = undefined;
+                };
+                resolve();
+            } else {
+                reject();
+            }
+        });
+    }
+    /**
      * Request the other side of the socket to end transmission, allowing a clean disconnect.
      * @param cb Optional callback.
      */
@@ -279,34 +362,86 @@ export class Socket extends EventEmitter {
     /**
      * Request the client to use an option.
      * @param option The option requested.
+     * @return Resolves based on whether or not the responder was actually setup.
      */
-    public do(option: Options): this {
-        this.write(Util.writeIAC(Negotiation.DO, option));
-        return this;
+    public async do(
+        option: Options,
+        response: boolean = false,
+    ): Promise<boolean> {
+        try {
+            if (!response) {
+                await this.setupResponder(Negotiation.DO, option);
+            } else {
+                this.options[option] = true;
+            }
+            this.write(Util.writeIAC(Negotiation.DO, option));
+            return true;
+        } catch (e) {
+            return false;
+        }
     }
     /**
      * Tell the client to no longer use an option.
      * @param option The option to stop using.
+     * @return Resolves based on whether or not the responder was actually setup.
      */
-    public dont(option: Options): this {
-        this.write(Util.writeIAC(Negotiation.DONT, option));
-        return this;
+    public async dont(
+        option: Options,
+        response: boolean = false,
+    ): Promise<boolean> {
+        try {
+            if (!response) {
+                await this.setupResponder(Negotiation.DONT, option);
+            } else {
+                this.options[option] = undefined;
+            }
+            this.write(Util.writeIAC(Negotiation.DONT, option));
+            return true;
+        } catch (e) {
+            return false;
+        }
     }
     /**
      * Express willingness to use an option.
      * @param option The option requested.
+     * @return Resolves based on whether or not the responder was actually setup.
      */
-    public will(option: Options): this {
-        this.write(Util.writeIAC(Negotiation.WILL, option));
-        return this;
+    public async will(
+        option: Options,
+        response: boolean = false,
+    ): Promise<boolean> {
+        try {
+            if (!response) {
+                await this.setupResponder(Negotiation.WILL, option);
+            } else {
+                this.options[option] = true;
+            }
+            this.write(Util.writeIAC(Negotiation.WILL, option));
+            return true;
+        } catch (e) {
+            return false;
+        }
     }
     /**
      * Refuse to use an option.
      * @param option The option to stop using.
+     * @return Resolves based on whether or not the responder was actually setup.
      */
-    public wont(option: Options): this {
-        this.write(Util.writeIAC(Negotiation.WONT, option));
-        return this;
+    public async wont(
+        option: Options,
+        response: boolean = false,
+    ): Promise<boolean> {
+        try {
+            if (!response) {
+                await this.setupResponder(Negotiation.WONT, option);
+            } else {
+                this.options[option] = undefined;
+            }
+            this.write(Util.writeIAC(Negotiation.WONT, option));
+            return true;
+        } catch (e) {
+            return false;
+        }
     }
     /**
      * Send a GMCP packet to the client (if enabled).
@@ -314,7 +449,7 @@ export class Socket extends EventEmitter {
      * @param data The object to send.
      */
     public gmcp(packages: string, data: { [key: string]: any }): boolean {
-        if (this.canGMCP) {
+        if (this.options[Options.GMCP]) {
             return this.write(
                 Util.writeSB(
                     Options.GMCP,
@@ -327,14 +462,16 @@ export class Socket extends EventEmitter {
     }
     /**
      * Enable GMCP for this client.
+     * @return Resolves based on whether or not the responder was actually setup.
      */
-    public enableGMCP(): this {
+    public async enableGMCP(): Promise<boolean> {
         return this.do(Options.GMCP);
     }
     /**
      * Disable GMCP for this client.
+     * @return Resolves based on whether or not the responder was actually setup.
      */
-    public disableGMCP(): this {
+    public async disableGMCP(): Promise<boolean> {
         return this.dont(Options.GMCP);
     }
     /**
@@ -346,6 +483,10 @@ export class Socket extends EventEmitter {
     public destroy(error?: Error): void {
         return this.socket.destroy(error);
     }
+    /**
+     * Enabled or disabled events for specific options when a response is received.
+     */
+    public emit(event: "enabled" | "disabled", option: Options): boolean;
     public emit(event: "error", error: Error): boolean;
     /**
      * Raw data from the internal buffer. Stripped of newline and carriage return.
@@ -389,6 +530,13 @@ export class Socket extends EventEmitter {
     public on(
         event: "subnegotiation",
         listener: (option: Options, data: Buffer) => void,
+    ): this;
+    /**
+     * Enabled or disabled events for specific options when a response is received.
+     */
+    public on(
+        event: "enabled" | "disabled",
+        listener: (option: Options) => void,
     ): this;
     public on(event: string, listener: EventListener): this {
         return super.on(event, listener);
