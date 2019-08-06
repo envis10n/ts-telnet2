@@ -92,7 +92,7 @@ export enum Options {
     EXTENDED_OPTIONS_LIST = 255,
 }
 
-interface ISBParse {
+export interface ISBParse {
     option: Options;
     data: Buffer;
 }
@@ -190,7 +190,7 @@ export class Server extends EventEmitter {
     }
 }
 
-type Responder = (
+export type Responder = (
     negotiate:
         | Negotiation.DO
         | Negotiation.DONT
@@ -198,12 +198,14 @@ type Responder = (
         | Negotiation.WONT,
 ) => void;
 
+export type OptionMatrix<T> = { [key in Options]?: T };
+
 export class Socket extends EventEmitter {
     public readonly uuid: string = v4();
     /**
      * Currently enabled options.
      */
-    public options: { [key in Options]?: boolean } = {};
+    public options: OptionMatrix<boolean> = {};
     /**
      * Buffer for incoming data.
      *
@@ -215,7 +217,7 @@ export class Socket extends EventEmitter {
      *
      * Contains responder functions for options that have been requested from this side.
      */
-    private responders: { [key in Options]?: Responder } = {};
+    private responders: OptionMatrix<Responder> = {};
     constructor(private readonly socket: net.Socket) {
         super();
         this.socket.on("connect", () => {
