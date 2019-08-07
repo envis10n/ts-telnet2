@@ -169,22 +169,10 @@ export namespace Util {
             data,
         };
     }
-    export function splitGMCP(buffer: Buffer): Buffer[] {
-        const res: Buffer[] = [];
-        const packs = buffer
-            .toString()
-            .split(Buffer.from([Negotiation.IAC, Negotiation.SE]).toString());
-        for (const pack of packs) {
-            res.push(
-                Buffer.from([
-                    ...Buffer.from(pack),
-                    Negotiation.IAC,
-                    Negotiation.SE,
-                ]),
-            );
-        }
-        return res;
-    }
+    /**
+     * Splits a buffer into individual IAC sequences.
+     * @param buffer The input buffer.
+     */
     export function splitIAC(buffer: Buffer): Buffer[] {
         const res: Buffer[] = [];
         let temp: number = 0;
@@ -218,7 +206,9 @@ export namespace Util {
     }
 }
 
+/** Telnet server wrapper for a raw TCP server. */
 export class Server extends EventEmitter {
+    /** Map of uuids to telnet sockets. */
     private sockets: Map<string, Socket> = new Map();
     constructor(private server: net.Server) {
         super();
@@ -240,6 +230,10 @@ export class Server extends EventEmitter {
             this.emit("error", err);
         });
     }
+    /**
+     * Close the server, closing all currently connected sockets.
+     * @param cb Optinal callback.
+     */
     public close(cb?: (err?: Error) => void): this {
         this.server.close(cb);
         return this;
@@ -256,11 +250,16 @@ export class Server extends EventEmitter {
     public on(event: string, listener: EventListener): this {
         return super.on(event, listener);
     }
+    /**
+     * Get a telnet socket by UUID.
+     * @param uuid The uuid of the socket to grab.
+     */
     public getSocket(uuid: string): Socket | undefined {
         return this.sockets.get(uuid);
     }
 }
 
+/** Responder for a negotiation response. Used to automatically enable options when the other end responds. */
 export type Responder = (
     negotiate:
         | Negotiation.DO
@@ -269,9 +268,12 @@ export type Responder = (
         | Negotiation.WONT,
 ) => void;
 
+/** Options enum mapped to <T> */
 export type OptionMatrix<T> = { [key in Options]?: T };
 
+/** Client telnet wrapper for a raw TCP socket. */
 export class Socket extends EventEmitter {
+    /** UUID for this socket. */
     public readonly uuid: string = v4();
     /**
      * Currently enabled options.
@@ -374,11 +376,14 @@ export class Socket extends EventEmitter {
             } else if (Util.isEOL(Buffer.from(this.buffer))) {
                 const buffer = Util.stripEOL(Buffer.from(this.buffer));
                 this.emit("data", buffer);
-                this.emit("message", buffer.toString(
-                    this.options[Options.BINARY_TRANSMISSION]
-                        ? "utf8"
-                        : "ascii"
-                ));
+                this.emit(
+                    "message",
+                    buffer.toString(
+                        this.options[Options.BINARY_TRANSMISSION]
+                            ? "utf8"
+                            : "ascii",
+                    ),
+                );
                 this.buffer = [];
             }
         });
