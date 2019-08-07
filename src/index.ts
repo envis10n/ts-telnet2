@@ -159,7 +159,6 @@ export namespace Util {
                 ]),
             );
         }
-        console.log(res);
         return res;
     }
     export function splitIAC(buffer: Buffer): Buffer[] {
@@ -351,7 +350,11 @@ export class Socket extends EventEmitter {
             } else if (Util.isEOL(Buffer.from(this.buffer))) {
                 const buffer = Util.stripEOL(Buffer.from(this.buffer));
                 this.emit("data", buffer);
-                this.emit("message", buffer.toString());
+                this.emit("message", buffer.toString(
+                    this.options[Options.BINARY_TRANSMISSION]
+                        ? "utf8"
+                        : "ascii"
+                ));
                 this.buffer = [];
             }
         });
