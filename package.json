@@ -26,8 +26,9 @@
     "scripts": {
         "start": "tsc && node .",
         "test": "jest",
-        "build": "tsc",
-        "docs": "typedoc ./src"
+        "build": "jest && tsc",
+        "docs": "typedoc ./src",
+        "push": "jest && typedoc ./src && git stage . && git commit -m \"Generate docs.\" && git push"
     },
     "dependencies": {
         "uuid": "^3.3.2"
