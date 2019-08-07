@@ -389,6 +389,10 @@ export class Socket extends EventEmitter {
                 this.buffer = [];
             }
         });
+        // Bubble raw tcp socket errors up the chain.
+        this.socket.on("error", (err) => {
+            this.emit("error", err);
+        });
     }
     /**
      * Request the other side of the socket to end transmission, allowing a clean disconnect.
