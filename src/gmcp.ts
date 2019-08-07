@@ -1,5 +1,5 @@
 export interface IGMCP {
-    package: string[];
+    package: string;
     data: { [key: string]: any };
 }
 
@@ -7,7 +7,7 @@ export function parseGMCP(data: Buffer): IGMCP {
     const dstr: string = data.toString();
     const offset: number = dstr.indexOf(" ");
     if (offset > -1) {
-        const pack: string[] = dstr.substring(0, offset).split(".");
+        const pack: string = dstr.substring(0, offset);
         const json: string = dstr.substring(offset + 1);
         const obj = JSON.parse(json);
         return {
@@ -16,7 +16,7 @@ export function parseGMCP(data: Buffer): IGMCP {
         };
     } else {
         return {
-            package: dstr.split("."),
+            package: dstr,
             data: {},
         };
     }

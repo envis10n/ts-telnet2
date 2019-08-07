@@ -540,7 +540,7 @@ export class Socket extends EventEmitter {
     public emit(event: "end" | "connect"): boolean;
     public emit(
         event: "gmcp",
-        packages: string[],
+        packages: string,
         obj: { [key: string]: any },
     ): boolean;
     public emit(
