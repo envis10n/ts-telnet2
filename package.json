@@ -10,7 +10,6 @@
         "build",
         "LICENSE",
         "README.md",
-        "docs",
         "types"
     ],
     "devDependencies": {
