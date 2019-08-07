@@ -1,6 +1,6 @@
 {
     "name": "ts-telnet2",
-    "version": "0.2.5",
+    "version": "0.2.6",
     "description": "Typescript Telnet library",
     "main": "build/index.js",
     "author": "envis10n <envis10n@protonmail.com>",
@@ -27,8 +27,7 @@
         "test": "jest",
         "build": "jest && tsc",
         "docs": "typedoc ./src",
-        "push": "jest && typedoc ./src && git stage . && git commit -m \"Generate docs.\" && git push",
-        "publish": "npm run build && npm publish"
+        "push": "jest && typedoc ./src && git stage . && git commit -m \"Generate docs.\" && git push"
     },
     "dependencies": {
         "uuid": "^3.3.2"
