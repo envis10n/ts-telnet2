@@ -15,7 +15,9 @@ export enum Negotiation {
     /**  */
     DONT = 254,
     NOP = 241,
+    /** Subnegotiation used for sending out-of-band data. */
     SB = 250,
+    /** Marks the end of a subnegotiation sequence. */
     SE = 240,
     IS = 0,
     SEND = 1,
@@ -92,20 +94,31 @@ export enum Options {
     EXTENDED_OPTIONS_LIST = 255,
 }
 
+/**
+ * Subnegotiation parse.
+ */
 export interface ISBParse {
+    /** The option being used. */
     option: Options;
+    /** The data buffer for this subnegotiation. */
     data: Buffer;
 }
 
+/** A utility namespace containing helper functions for the library. */
 export namespace Util {
+    /**
+     * Creates a buffer containing an IAC sequence.
+     * @param negotiate The negotiation byte for this IAC sequence.
+     * @param option The option byte for this IAC sequence.
+     */
     export function writeIAC(negotiate: Negotiation, option: Options): Buffer {
-        return Buffer.from([
-            Negotiation.IAC,
-            negotiate,
-            option,
-            ...Buffer.from("\n"),
-        ]);
+        return Buffer.from([Negotiation.IAC, negotiate, option]);
     }
+    /**
+     * Creates a buffer containing a subnegotiation sequence.
+     * @param option The option byte for this subnegotiation sequence.
+     * @param data The data for this subnegotiation sequence.
+     */
     export function writeSB(option: Options, data: string): Buffer {
         const d = Buffer.from(data);
         const fin: number[] = [];
@@ -124,12 +137,19 @@ export namespace Util {
             ...Buffer.from(fin),
             Negotiation.IAC,
             Negotiation.SE,
-            ...Buffer.from("\n"),
         ]);
     }
+    /**
+     * Checks a buffer for an End of Line (\n | \r\n).
+     * @param buffer The buffer to check for EOL.
+     */
     export function isEOL(buffer: Buffer): boolean {
         return buffer[buffer.length - 1] === Buffer.from("\n")[0];
     }
+    /**
+     * Strips EOL from the end of a buffer.
+     * @param buffer The buffer input.
+     */
     export function stripEOL(buffer: Buffer): Buffer {
         if (buffer[buffer.length - 2] === Buffer.from("\r")[0]) {
             return buffer.slice(0, buffer.length - 2);
@@ -137,6 +157,10 @@ export namespace Util {
             return buffer.slice(0, buffer.length - 1);
         }
     }
+    /**
+     * Parses a subnegotiation sequence into the option and data.
+     * @param buffer The buffer to parse.
+     */
     export function parseSB(buffer: Buffer): ISBParse {
         const option = buffer[2] as Options;
         const data = buffer.slice(3, buffer.length - 2);
