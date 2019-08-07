@@ -566,7 +566,7 @@ export class Socket extends EventEmitter {
      */
     public on(
         event: "gmcp",
-        listener: (packages: string[], obj: { [key: string]: any }) => void,
+        listener: (packages: string, obj: { [key: string]: any }) => void,
     ): this;
     public on(
         event: "will" | "wont" | "do" | "dont",
