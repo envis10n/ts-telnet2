@@ -202,6 +202,8 @@ export namespace Util {
                     break;
             }
         }
+        // Fix for single-IAC sequence buffers.
+        res.push(buffer.slice(temp));
         return res;
     }
 }
