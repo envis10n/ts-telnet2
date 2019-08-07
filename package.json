@@ -1,6 +1,6 @@
 {
     "name": "ts-telnet2",
-    "version": "0.2.4",
+    "version": "0.2.5",
     "description": "Typescript Telnet library",
     "main": "build/index.js",
     "author": "envis10n <envis10n@protonmail.com>",
