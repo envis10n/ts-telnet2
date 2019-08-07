@@ -27,7 +27,8 @@
         "test": "jest",
         "build": "jest && tsc",
         "docs": "typedoc ./src",
-        "push": "jest && typedoc ./src && git stage . && git commit -m \"Generate docs.\" && git push"
+        "push": "jest && typedoc ./src && git stage . && git commit -m \"Generate docs.\" && git push",
+        "publish": "npm run build && npm publish"
     },
     "dependencies": {
         "uuid": "^3.3.2"
