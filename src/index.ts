@@ -393,6 +393,10 @@ export class Socket extends EventEmitter {
         this.socket.on("error", (err) => {
             this.emit("error", err);
         });
+
+        this.socket.on("close", (hadError) => {
+            this.emit("close", hadError);
+        });
     }
     /**
      * Request the other side of the socket to end transmission, allowing a clean disconnect.
