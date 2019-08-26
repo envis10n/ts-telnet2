@@ -212,7 +212,10 @@ export namespace Util {
 export class Server extends EventEmitter {
     /** Map of uuids to telnet sockets. */
     private sockets: Map<string, Socket> = new Map();
-    constructor(private server: net.Server) {
+    constructor(
+        private server: net.Server,
+        public options: OptionMatrix<boolean> = {},
+    ) {
         super();
         this.server.on("connection", (socket) => {
             let nsock: Socket | null = new Socket(socket);
@@ -261,17 +264,10 @@ export class Server extends EventEmitter {
     }
 }
 
-/** Responder for a negotiation response. Used to automatically enable options when the other end responds. */
-export type Responder = (
-    negotiate:
-        | Negotiation.DO
-        | Negotiation.DONT
-        | Negotiation.WILL
-        | Negotiation.WONT,
-) => void;
-
 /** Options enum mapped to <T> */
-export type OptionMatrix<T> = { [key in Options]?: T };
+export type OptionMatrix<T> = {
+    [key in Options]?: T;
+};
 
 /** Client telnet wrapper for a raw TCP socket. */
 export class Socket extends EventEmitter {
@@ -280,21 +276,19 @@ export class Socket extends EventEmitter {
     /**
      * Currently enabled options.
      */
-    public options: OptionMatrix<boolean> = {};
+    public options: OptionMatrix<boolean>;
     /**
      * Buffer for incoming data.
      *
      * Empties when an EOL is encountered, emitting the "data" event.
      */
     private buffer: number[] = [];
-    /**
-     * Responder storage object.
-     *
-     * Contains responder functions for options that have been requested from this side.
-     */
-    private responders: OptionMatrix<Responder> = {};
-    constructor(public readonly socket: net.Socket) {
+    constructor(
+        public readonly socket: net.Socket,
+        options: OptionMatrix<boolean> = {},
+    ) {
         super();
+        this.options = Object.assign({}, options);
         this.socket.on("connect", () => {
             this.emit("connect");
         });
@@ -310,30 +304,17 @@ export class Socket extends EventEmitter {
                 // IAC!
                 for (const buffer of Util.splitIAC(Buffer.from(this.buffer))) {
                     this.emit("data", buffer);
-                    const responder = this.responders[buffer[2] as Options];
                     switch (buffer[1] as Negotiation) {
                         case Negotiation.DO:
-                            if (responder !== undefined) {
-                                responder(buffer[1]);
-                            }
                             this.emit("do", buffer[2] as Options);
                             break;
                         case Negotiation.DONT:
-                            if (responder !== undefined) {
-                                responder(buffer[1]);
-                            }
                             this.emit("dont", buffer[2] as Options);
                             break;
                         case Negotiation.WILL:
-                            if (responder !== undefined) {
-                                responder(buffer[1]);
-                            }
                             this.emit("will", buffer[2] as Options);
                             break;
                         case Negotiation.WONT:
-                            if (responder !== undefined) {
-                                responder(buffer[1]);
-                            }
                             this.emit("wont", buffer[2] as Options);
                             break;
                         case Negotiation.SB:
@@ -388,6 +369,16 @@ export class Socket extends EventEmitter {
                 );
                 this.buffer = [];
             }
+            for (const key of (Object.keys(
+                this.options,
+            ) as unknown) as Options[]) {
+                const value = this.options[key];
+                if (value) {
+                    this.do(key);
+                } else {
+                    this.dont(key);
+                }
+            }
         });
         // Bubble raw tcp socket errors up the chain.
         this.socket.on("error", (err) => {
@@ -397,6 +388,48 @@ export class Socket extends EventEmitter {
         this.socket.on("close", (hadError) => {
             this.emit("close", hadError);
         });
+    }
+    public setOption(option: Options, value: boolean): void {
+        this.options[option] = value;
+        if (value) {
+            this.do(option);
+        } else {
+            this.dont(option);
+        }
+    }
+    /**
+     * Set whether this socket should use GMCP.
+     */
+    set gmcp(value: boolean) {
+        this.options[Options.GMCP] = value;
+        if (value) {
+            this.do(Options.GMCP);
+        } else {
+            this.dont(Options.GMCP);
+        }
+    }
+    /**
+     * Get whether this socket is using GMCP.
+     */
+    get gmcp(): boolean {
+        return this.options[Options.GMCP] || false;
+    }
+    /**
+     * Set whether this socket should use binary transmission.
+     */
+    set binary(value: boolean) {
+        this.options[Options.BINARY_TRANSMISSION] = value;
+        if (value) {
+            this.do(Options.BINARY_TRANSMISSION);
+        } else {
+            this.dont(Options.BINARY_TRANSMISSION);
+        }
+    }
+    /**
+     * Get whether this socket is using binary transmission.
+     */
+    get binary(): boolean {
+        return this.options[Options.BINARY_TRANSMISSION] || false;
     }
     /**
      * Request the other side of the socket to end transmission, allowing a clean disconnect.
@@ -416,89 +449,41 @@ export class Socket extends EventEmitter {
     /**
      * Request the client to use an option.
      * @param option The option requested.
-     * @param response Whether this is a response. If it is, a responder will not be created.
-     * @return A promise that resolves to a boolean, representing whether or not the option was enabled.
      */
-    public async do(
-        option: Options,
-        response: boolean = false,
-    ): Promise<boolean> {
-        if (!response) {
-            const responder = this.setupResponder(Negotiation.DO, option);
-            this.write(Util.writeIAC(Negotiation.DO, option));
-            return responder;
-        } else {
-            this.options[option] = true;
-            this.write(Util.writeIAC(Negotiation.DO, option));
-            return true;
-        }
+    public do(option: Options): void {
+        this.options[option] = true;
+        this.write(Util.writeIAC(Negotiation.DO, option));
     }
     /**
      * Tell the client to no longer use an option.
      * @param option The option to stop using.
-     * @param response Whether this is a response. If it is, a responder will not be created.
-     * @return A promise that resolves to a boolean, representing whether or not the option was enabled.
      */
-    public async dont(
-        option: Options,
-        response: boolean = false,
-    ): Promise<boolean> {
-        if (!response) {
-            const responder = this.setupResponder(Negotiation.DONT, option);
-            this.write(Util.writeIAC(Negotiation.DONT, option));
-            return responder;
-        } else {
-            this.options[option] = undefined;
-            this.write(Util.writeIAC(Negotiation.DONT, option));
-            return false;
-        }
+    public dont(option: Options): void {
+        this.options[option] = undefined;
+        this.write(Util.writeIAC(Negotiation.DONT, option));
     }
     /**
      * Express willingness to use an option.
      * @param option The option requested.
-     * @param response Whether this is a response. If it is, a responder will not be created.
-     * @return A promise that resolves to a boolean, representing whether or not the option was enabled.
      */
-    public async will(
-        option: Options,
-        response: boolean = false,
-    ): Promise<boolean> {
-        if (!response) {
-            const responder = this.setupResponder(Negotiation.WILL, option);
-            this.write(Util.writeIAC(Negotiation.WILL, option));
-            return responder;
-        } else {
-            this.options[option] = true;
-            this.write(Util.writeIAC(Negotiation.WILL, option));
-            return true;
-        }
+    public will(option: Options): void {
+        this.options[option] = true;
+        this.write(Util.writeIAC(Negotiation.WILL, option));
     }
     /**
      * Refuse to use an option.
      * @param option The option to stop using.
-     * @param response Whether this is a response. If it is, a responder will not be created.
-     * @return A promise that resolves to a boolean, representing whether or not the option was enabled.
      */
-    public async wont(
-        option: Options,
-        response: boolean = false,
-    ): Promise<boolean> {
-        if (!response) {
-            const responder = this.setupResponder(Negotiation.WONT, option);
-            this.write(Util.writeIAC(Negotiation.WONT, option));
-            return responder;
-        } else {
-            this.options[option] = undefined;
-            this.write(Util.writeIAC(Negotiation.WONT, option));
-            return false;
-        }
+    public wont(option: Options): void {
+        this.options[option] = undefined;
+        this.write(Util.writeIAC(Negotiation.WONT, option));
     }
     /**
      * Send a GMCP packet to the client (if enabled).
      * @param packages The package string for this GMCP packet.
      * @param data The object to send.
      */
-    public gmcp(packages: string, data: { [key: string]: any }): boolean {
+    public writeGMCP(packages: string, data: { [key: string]: any }): boolean {
         if (this.options[Options.GMCP]) {
             return this.write(
                 Util.writeSB(
@@ -509,20 +494,6 @@ export class Socket extends EventEmitter {
         } else {
             return false;
         }
-    }
-    /**
-     * Enable GMCP for this client.
-     * @return A promise that resolves to a boolean, representing whether or not the option was enabled.
-     */
-    public async enableGMCP(): Promise<boolean> {
-        return this.do(Options.GMCP);
-    }
-    /**
-     * Disable GMCP for this client.
-     * @return A promise that resolves to a boolean, representing whether or not the option was enabled.
-     */
-    public async disableGMCP(): Promise<boolean> {
-        return this.dont(Options.GMCP);
     }
     /**
      * Immediately destroy this socket.
@@ -595,54 +566,6 @@ export class Socket extends EventEmitter {
     ): this;
     public on(event: string, listener: EventListener): this {
         return super.on(event, listener);
-    }
-    /**
-     * Sets up a responder function that is called when a response is received from the other end.
-     * @param neg Negotiation type.
-     * @param option The option being negotiated.
-     * @return A promise that resolves to a boolean, representing whether or not the option was enabled.
-     */
-    private async setupResponder(
-        neg: Negotiation,
-        option: Options,
-    ): Promise<boolean> {
-        return new Promise((resolve, reject) => {
-            if (this.responders[option] === undefined) {
-                this.responders[option] = (n) => {
-                    switch (n) {
-                        case Negotiation.DO:
-                            if (neg === Negotiation.WILL) {
-                                this.options[option] = true;
-                            }
-                            break;
-                        case Negotiation.DONT:
-                            if (neg === Negotiation.WONT) {
-                                this.options[option] = undefined;
-                            }
-                            break;
-                        case Negotiation.WILL:
-                            if (neg === Negotiation.DO) {
-                                this.options[option] = true;
-                            }
-                            break;
-                        case Negotiation.WONT:
-                            if (neg === Negotiation.DONT) {
-                                this.options[option] = undefined;
-                            }
-                            break;
-                    }
-                    if (this.options[option]) {
-                        this.emit("enabled", option);
-                    } else {
-                        this.emit("disabled", option);
-                    }
-                    this.responders[option] = undefined;
-                    resolve(this.options[option] || false);
-                };
-            } else {
-                reject();
-            }
-        });
     }
 }
 /**
